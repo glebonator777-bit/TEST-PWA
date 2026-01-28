@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PWA Test</title>
+
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="theme-color" content="#11111a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+
+  <style>
+    body{margin:0;font-family:system-ui;background:#0b0b10;color:#fff}
+    .wrap{max-width:420px;margin:0 auto;padding:20px}
+    button,a{width:100%;padding:14px;border-radius:14px;border:0;font-weight:800;font-size:16px;display:block;text-align:center;text-decoration:none}
+    #installBtn{background:#f5c84b;color:#000;display:none}
+    #goBtn{margin-top:12px;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff}
+    .muted{margin-top:12px;font-size:13px;opacity:.75}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>PWA install test</h1>
+    <p>Натисни кнопку встановлення.</p>
+
+    <button id="installBtn">Встановити</button>
+    <a id="goBtn" href="https://example.com">Перейти далі</a>
+
+    <p id="status" class="muted"></p>
+  </main>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js")
+      .then(() => console.log("SW registered ✅"))
+      .catch(err => console.warn("SW error:", err));
+  });
+}
+
+let deferredPrompt;
+const btn = document.getElementById("installBtn");
+const status = document.getElementById("status");
+
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  btn.style.display = "block";
+  status.textContent = "Готово до встановлення";
+});
+
+btn.addEventListener("click", async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const res = await deferredPrompt.userChoice;
+  status.textContent = "Результат: " + res.outcome;
+  deferredPrompt = null;
+  btn.style.display = "none";
+});
+
+window.addEventListener("appinstalled", () => {
+  status.textContent = "PWA встановлено 🎉";
+});
+</script>
+</body>
+</html>
