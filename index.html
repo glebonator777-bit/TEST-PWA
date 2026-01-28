@@ -32,7 +32,9 @@
 <script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js");
+    navigator.serviceWorker.register("/sw.js")
+      .then(() => console.log("SW registered ✅"))
+      .catch(err => console.warn("SW error:", err));
   });
 }
 
@@ -48,16 +50,6 @@ window.addEventListener("beforeinstallprompt", e => {
 });
 
 btn.addEventListener("click", async () => {
+  if (!deferredPrompt) return;
   deferredPrompt.prompt();
-  const res = await deferredPrompt.userChoice;
-  status.textContent = "Результат: " + res.outcome;
-  deferredPrompt = null;
-  btn.style.display = "none";
-});
-
-window.addEventListener("appinstalled", () => {
-  status.textContent = "PWA встановлено 🎉";
-});
-</script>
-</body>
-</html>
+  const res = await deferredPrompt
